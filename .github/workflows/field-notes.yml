@@ -1,0 +1,42 @@
+name: Field notes
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+      timezone: "Africa/Lagos"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Add daily notes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "SAVAGE✰"
+          git config user.email "142899691+Savage27z@users.noreply.github.com"
+
+          note_day="$(TZ=Africa/Lagos date +%F)"
+          note_file="notes/${note_day}.md"
+          mkdir -p notes
+          touch "${note_file}"
+
+          for entry in $(seq -w 1 12); do
+            stamp="${note_day} 00:${entry}:00 +0100"
+            printf -- "- %s · entry %s\n" "${note_day}" "${entry}" >> "${note_file}"
+            git add "${note_file}"
+            GIT_AUTHOR_DATE="${stamp}" GIT_COMMITTER_DATE="${stamp}" \
+              git commit -m "notes: ${note_day} ${entry}"
+          done
+
+          git push origin HEAD:main
