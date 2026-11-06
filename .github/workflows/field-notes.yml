@@ -28,12 +28,13 @@ jobs:
 
           note_day="$(TZ=Africa/Lagos date +%F)"
           note_file="notes/${note_day}.md"
+          commit_count=$((30 + RANDOM % 26))
           mkdir -p notes
           touch "${note_file}"
 
-          for entry in $(seq -w 1 12); do
+          for entry in $(seq -w 1 "${commit_count}"); do
             stamp="${note_day} 00:${entry}:00 +0100"
-            printf -- "- %s · entry %s\n" "${note_day}" "${entry}" >> "${note_file}"
+            printf -- "- %s · entry %s of %s\n" "${note_day}" "${entry}" "${commit_count}" >> "${note_file}"
             git add "${note_file}"
             GIT_AUTHOR_DATE="${stamp}" GIT_COMMITTER_DATE="${stamp}" \
               git commit -m "notes: ${note_day} ${entry}"
